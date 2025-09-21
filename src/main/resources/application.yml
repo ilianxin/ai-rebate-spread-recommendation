@@ -1,0 +1,95 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/rebate-ai
+
+spring:
+  application:
+    name: rebate-spread-ai
+  datasource:
+    url: jdbc:h2:mem:rebate_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+# AI推荐配置
+ai:
+  rebate:
+    # 默认推荐参数
+    default-spread-range: 0.1
+    min-spread: 0.01
+    max-spread: 0.5
+    # 学习参数
+    learning-rate: 0.01
+    volatility-weight: 0.3
+    volume-weight: 0.4
+    history-weight: 0.3
+  
+  # LLM大模型配置
+  llm:
+    # 服务提供商: openai, local, fallback
+    provider: fallback
+    # 是否启用LLM推荐
+    enabled: true
+    # 回退策略: 当LLM失败时是否使用传统算法
+    fallback-enabled: true
+    
+    # OpenAI配置
+    openai:
+      api-key: ${OPENAI_API_KEY:your-openai-api-key}
+      model: gpt-4
+      base-url: https://api.openai.com/v1
+      temperature: 0.3
+      max-tokens: 1000
+      timeout: 30000
+    
+    # 本地模型配置 (Ollama等)
+    local:
+      base-url: http://localhost:11434
+      model: llama3
+      temperature: 0.3
+      timeout: 30000
+      
+    # 缓存配置
+    cache:
+      enabled: true
+      ttl: 3600 # 缓存1小时
+
+# 日志配置
+logging:
+  level:
+    com.airebate: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Actuator端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# API文档配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
